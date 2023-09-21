@@ -34,3 +34,8 @@ create table products
     constraint fk_category_id foreign key (category_id) references categories (id)
 ) engine innodb;
 select * from products;
+drop table products;
+drop table categories;
+drop table counters;
+show tables;
+select * from categories;
