@@ -249,4 +249,69 @@ class QueryBuilderTest extends TestCase
             Log::info(json_encode($item));
         });
     }
+
+    public function testPaging()
+    {
+        $this->insetCategories();
+
+        $collection = DB::table("categories")
+            ->skip(0)
+            ->take(2)
+            ->get();
+
+        self::assertCount(2, $collection);
+        $collection->each(function ($item) {
+            Log::info(json_encode($item));
+        });
+    }
+
+    public function insertManyCategories()
+    {
+        for ($i = 0; $i < 100; $i++) {
+            DB::table('categories')->insert([
+                "id" => "CATEGORY - $i",
+                "name" => "Category - $i",
+                "created_at" => "2020-10-10 10:10:10"
+            ]);
+        }
+    }
+
+    public function testChunk()
+    {
+        $this->insertManyCategories();
+
+        DB::table("categories")->orderBy("id")
+            ->chunk(10, function ($categories) {
+                self::assertNotNull($categories);
+                Log::info("Start Chunk");
+                $categories->each(function ($categories) {
+                    Log::info(json_encode($categories));
+                });
+                Log::info("End Chunk");
+            });
+    }
+
+    public function testLazy()
+    {
+        $this->insertManyCategories();
+
+        $collection = DB::table("categories")->orderBy("id")->lazy(10)->take(3);
+        self::assertNotNull($collection);
+
+        $collection->each(function ($item) {
+            Log::info(json_encode($item));
+        });
+    }
+
+    public function testCursor()
+    {
+        $this->insertManyCategories();
+
+        $collection = DB::table("categories")->orderBy("id")->cursor();
+        self::assertNotNull($collection);
+
+        $collection->each(function ($item) {
+            Log::info(json_encode($item));
+        });
+    }
 }
